@@ -1,40 +1,30 @@
 package com.sms.semester.controller;
 
-import com.sms.semester.entity.Semester;
+import com.sms.semester.dto.SemesterDTO;
 import com.sms.semester.service.SemesterService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/semesters")
+@RequestMapping("/api/semesters")
 @RequiredArgsConstructor
 public class SemesterController {
 
     private final SemesterService semesterService;
 
-    @GetMapping
-    public ResponseEntity<List<Semester>> getAllSemesters() {
-        return ResponseEntity.ok(semesterService.getAllSemesters());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Semester> getSemesterById(@PathVariable Long id) {
-        return semesterService.getSemesterById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @PostMapping
-    public ResponseEntity<Semester> createSemester(@RequestBody Semester semester) {
-        return ResponseEntity.ok(semesterService.saveSemester(semester));
+    public ResponseEntity<SemesterDTO> createSemester(@Valid @RequestBody SemesterDTO dto) {
+        SemesterDTO created = semesterService.createSemester(dto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSemester(@PathVariable Long id) {
-        semesterService.deleteSemester(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping
+    public ResponseEntity<List<SemesterDTO>> getAllSemesters() {
+        return ResponseEntity.ok(semesterService.getAllSemesters());
     }
 }

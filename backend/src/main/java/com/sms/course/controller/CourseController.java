@@ -1,35 +1,41 @@
 package com.sms.course.controller;
 
-import com.sms.course.entity.Course;
+import com.sms.course.dto.CourseDTO;
 import com.sms.course.service.CourseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/courses")
+@RequestMapping("/api/courses")
 @RequiredArgsConstructor
 public class CourseController {
 
     private final CourseService courseService;
 
+    @PostMapping
+    public ResponseEntity<CourseDTO> createCourse(@Valid @RequestBody CourseDTO dto) {
+        CourseDTO created = courseService.createCourse(dto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
     @GetMapping
-    public ResponseEntity<List<Course>> getAllCourses() {
+    public ResponseEntity<List<CourseDTO>> getAllCourses() {
         return ResponseEntity.ok(courseService.getAllCourses());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
-        return courseService.getCourseById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long id) {
+        return ResponseEntity.ok(courseService.getCourseById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<Course> createCourse(@RequestBody Course course) {
-        return ResponseEntity.ok(courseService.saveCourse(course));
+    @PutMapping("/{id}")
+    public ResponseEntity<CourseDTO> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseDTO dto) {
+        return ResponseEntity.ok(courseService.updateCourse(id, dto));
     }
 
     @DeleteMapping("/{id}")

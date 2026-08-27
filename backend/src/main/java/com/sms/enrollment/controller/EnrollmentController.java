@@ -1,35 +1,29 @@
 package com.sms.enrollment.controller;
 
-import com.sms.enrollment.entity.Enrollment;
+import com.sms.enrollment.dto.EnrollmentDTO;
 import com.sms.enrollment.service.EnrollmentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/v1/enrollments")
+@RequestMapping("/api/enrollments")
 @RequiredArgsConstructor
 public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
 
-    @GetMapping
-    public ResponseEntity<List<Enrollment>> getAllEnrollments() {
-        return ResponseEntity.ok(enrollmentService.getAllEnrollments());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Enrollment> getEnrollmentById(@PathVariable Long id) {
-        return enrollmentService.getEnrollmentById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @PostMapping
-    public ResponseEntity<Enrollment> createEnrollment(@RequestBody Enrollment enrollment) {
-        return ResponseEntity.ok(enrollmentService.saveEnrollment(enrollment));
+    public ResponseEntity<EnrollmentDTO> createEnrollment(@Valid @RequestBody EnrollmentDTO dto) {
+        EnrollmentDTO created = enrollmentService.createEnrollment(dto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EnrollmentDTO> updateEnrollment(@PathVariable Long id, @Valid @RequestBody EnrollmentDTO dto) {
+        return ResponseEntity.ok(enrollmentService.updateEnrollment(id, dto));
     }
 
     @DeleteMapping("/{id}")

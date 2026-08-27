@@ -1,23 +1,45 @@
 package com.sms.degreeprogram.entity;
 
+import com.sms.common.entity.BaseEntity;
+import com.sms.student.entity.Student;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "degree_programs")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DegreeProgram {
+@SQLDelete(sql = "UPDATE degree_programs SET is_active = false WHERE degree_program_id=?")
+@SQLRestriction("is_active = true")
+public class DegreeProgram extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "degree_program_id")
+    private Long degreeProgramId;
 
-    private String title;
+    @Column(name = "program_code", unique = true, nullable = false)
+    private String programCode;
+
+    @Column(name = "program_name", nullable = false)
+    private String programName;
+
+    @Column(name = "department")
     private String department;
+
+    @Column(name = "duration_years")
+    private Integer durationYears;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "degreeProgram", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Student> students = new ArrayList<>();
 }

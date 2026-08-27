@@ -1,6 +1,6 @@
 package com.sms.semester.dto;
 
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,16 +13,15 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SemesterDTO {
-    private Long semesterId;
-
-    @NotNull(message = "Academic year ID is required")
+public class AcademicYearDTO {
     private Long academicYearId;
-
-    @NotNull(message = "Semester number is required")
-    @Min(value = 1, message = "Semester number must be at least 1")
-    private Integer semesterNumber;
-    private String name;
+    
+    @NotBlank(message = "Year label is required")
+    private String yearLabel;
+    
+    @NotNull(message = "Start date is required")
     private LocalDate startDate;
+    
+    @NotNull(message = "End date is required")
     private LocalDate endDate;
 }

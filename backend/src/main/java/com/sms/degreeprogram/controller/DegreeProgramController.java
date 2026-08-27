@@ -1,35 +1,41 @@
 package com.sms.degreeprogram.controller;
 
-import com.sms.degreeprogram.entity.DegreeProgram;
+import com.sms.degreeprogram.dto.DegreeProgramDTO;
 import com.sms.degreeprogram.service.DegreeProgramService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/degree-programs")
+@RequestMapping("/api/degree-programs")
 @RequiredArgsConstructor
 public class DegreeProgramController {
 
     private final DegreeProgramService degreeProgramService;
 
+    @PostMapping
+    public ResponseEntity<DegreeProgramDTO> createDegreeProgram(@Valid @RequestBody DegreeProgramDTO dto) {
+        DegreeProgramDTO created = degreeProgramService.createDegreeProgram(dto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
     @GetMapping
-    public ResponseEntity<List<DegreeProgram>> getAllDegreePrograms() {
+    public ResponseEntity<List<DegreeProgramDTO>> getAllDegreePrograms() {
         return ResponseEntity.ok(degreeProgramService.getAllDegreePrograms());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DegreeProgram> getDegreeProgramById(@PathVariable Long id) {
-        return degreeProgramService.getDegreeProgramById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<DegreeProgramDTO> getDegreeProgramById(@PathVariable Long id) {
+        return ResponseEntity.ok(degreeProgramService.getDegreeProgramById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<DegreeProgram> createDegreeProgram(@RequestBody DegreeProgram degreeProgram) {
-        return ResponseEntity.ok(degreeProgramService.saveDegreeProgram(degreeProgram));
+    @PutMapping("/{id}")
+    public ResponseEntity<DegreeProgramDTO> updateDegreeProgram(@PathVariable Long id, @Valid @RequestBody DegreeProgramDTO dto) {
+        return ResponseEntity.ok(degreeProgramService.updateDegreeProgram(id, dto));
     }
 
     @DeleteMapping("/{id}")
