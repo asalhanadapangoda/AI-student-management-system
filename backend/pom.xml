@@ -19,7 +19,7 @@
     <!-- ============================== -->
     <!-- Project Information             -->
     <!-- ============================== -->
-    <groupId>org.example</groupId>
+    <groupId>com.sms</groupId>
     <artifactId>backend</artifactId>
     <version>1.0.0</version>
 
