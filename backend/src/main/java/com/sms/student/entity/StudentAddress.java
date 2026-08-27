@@ -37,5 +37,6 @@ public class StudentAddress {
     private String postalCode;
 
     @Column(name = "is_current", nullable = false)
+    @Builder.Default
     private Boolean isCurrent = true;
 }

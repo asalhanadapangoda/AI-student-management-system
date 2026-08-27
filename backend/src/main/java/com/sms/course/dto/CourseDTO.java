@@ -23,5 +23,5 @@ public class CourseDTO {
     @NotNull(message = "Credits are required")
     private Integer credits;
     
-    private Long degreeProgramId;
+    private String description;
 }
