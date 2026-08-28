@@ -56,6 +56,9 @@ public class CourseOfferingService {
                 .courseOfferingId(entity.getCourseOfferingId())
                 .courseId(entity.getCourse() != null ? entity.getCourse().getCourseId() : null)
                 .semesterId(entity.getSemester() != null ? entity.getSemester().getSemesterId() : null)
+                .courseCode(entity.getCourse() != null ? entity.getCourse().getCourseCode() : null)
+                .courseName(entity.getCourse() != null ? entity.getCourse().getCourseName() : null)
+                .semesterName(entity.getSemester() != null ? entity.getSemester().getName() : null)
                 .build();
     }
 }

@@ -23,4 +23,8 @@ public class CourseOfferingDTO {
     @NotNull(message = "Max capacity is required")
     @Min(value = 1, message = "Max capacity must be at least 1")
     private Integer maxCapacity;
+    
+    private String courseCode;
+    private String courseName;
+    private String semesterName;
 }

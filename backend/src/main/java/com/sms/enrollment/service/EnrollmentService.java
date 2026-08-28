@@ -50,6 +50,12 @@ public class EnrollmentService {
                 .collect(Collectors.toList());
     }
 
+    public List<EnrollmentDTO> getAllEnrollments() {
+        return enrollmentRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
     public EnrollmentDTO updateEnrollment(Long id, EnrollmentDTO dto) {
         Enrollment existing = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Enrollment not found"));
@@ -70,6 +76,24 @@ public class EnrollmentService {
     }
 
     public EnrollmentDTO mapToDTO(Enrollment entity) {
+        String courseCode = null;
+        String courseName = null;
+        String semesterName = null;
+        String academicYear = null;
+        
+        if (entity.getCourseOffering() != null) {
+            if (entity.getCourseOffering().getCourse() != null) {
+                courseCode = entity.getCourseOffering().getCourse().getCourseCode();
+                courseName = entity.getCourseOffering().getCourse().getCourseName();
+            }
+            if (entity.getCourseOffering().getSemester() != null) {
+                semesterName = entity.getCourseOffering().getSemester().getName();
+                if (entity.getCourseOffering().getSemester().getAcademicYear() != null) {
+                    academicYear = entity.getCourseOffering().getSemester().getAcademicYear().getYearLabel();
+                }
+            }
+        }
+
         return EnrollmentDTO.builder()
                 .enrollmentId(entity.getEnrollmentId())
                 .studentId(entity.getStudent() != null ? entity.getStudent().getStudentId() : null)
@@ -78,6 +102,10 @@ public class EnrollmentService {
                 .enrolledAt(entity.getEnrolledAt())
                 .completedAt(entity.getCompletedAt())
                 .grade(entity.getGrade())
+                .courseCode(courseCode)
+                .courseName(courseName)
+                .semesterName(semesterName)
+                .academicYear(academicYear)
                 .build();
     }
 }

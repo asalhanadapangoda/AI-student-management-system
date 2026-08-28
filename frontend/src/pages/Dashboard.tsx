@@ -1,6 +1,36 @@
+import { useState, useEffect } from 'react';
 import { Users, BookOpen, ActivitySquare, TrendingUp, UserPlus, FileEdit, Clock } from 'lucide-react';
+import { getDashboardStats, getAuditLogs } from '../services/api';
+import { formatDistanceToNow } from 'date-fns';
+import { Link } from 'react-router-dom';
 
 export const Dashboard = () => {
+  const [stats, setStats] = useState<any>({ totalStudents: 0, activeStudents: 0, totalCourses: 0, currentSemester: '' });
+  const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsData, logsData] = await Promise.all([
+          getDashboardStats(),
+          getAuditLogs()
+        ]);
+        setStats(statsData);
+        setRecentLogs(logsData.slice(0, 5)); // Take only top 5 for dashboard
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
+  }
+
   return (
     <div className="pb-10">
       <div className="mb-8">
@@ -22,9 +52,9 @@ export const Dashboard = () => {
               </div>
               <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Total Students</p>
             </div>
-            <p className="text-4xl font-extrabold text-slate-800 mb-1 font-['Outfit']">1,250</p>
+            <p className="text-4xl font-extrabold text-slate-800 mb-1 font-['Outfit']">{stats.totalStudents}</p>
             <p className="text-xs font-medium text-emerald-500 flex items-center">
-              <TrendingUp size={12} className="mr-1" /> +12% from last month
+              All registered students
             </p>
           </div>
         </div>
@@ -41,9 +71,9 @@ export const Dashboard = () => {
               </div>
               <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Active Status</p>
             </div>
-            <p className="text-4xl font-extrabold text-slate-800 mb-1 font-['Outfit']">1,180</p>
+            <p className="text-4xl font-extrabold text-slate-800 mb-1 font-['Outfit']">{stats.activeStudents}</p>
             <p className="text-xs font-medium text-slate-400 flex items-center">
-              Current enrolled students
+              Current active students
             </p>
           </div>
         </div>
@@ -60,9 +90,9 @@ export const Dashboard = () => {
               </div>
               <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Courses</p>
             </div>
-            <p className="text-4xl font-extrabold text-slate-800 mb-1 font-['Outfit']">48</p>
+            <p className="text-4xl font-extrabold text-slate-800 mb-1 font-['Outfit']">{stats.totalCourses}</p>
             <p className="text-xs font-medium text-slate-400 flex items-center">
-              Active across 8 programs
+              Active courses in catalog
             </p>
           </div>
         </div>
@@ -77,11 +107,11 @@ export const Dashboard = () => {
               <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
                 <TrendingUp size={20} className="text-blue-600" />
               </div>
-              <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Enrollments</p>
+              <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Semester</p>
             </div>
-            <p className="text-4xl font-extrabold text-slate-800 mb-1 font-['Outfit']">4,350</p>
+            <p className="text-2xl font-extrabold text-slate-800 mb-1 font-['Outfit']">{stats.currentSemester}</p>
             <p className="text-xs font-medium text-blue-500 flex items-center">
-              Current semester total
+              Current academic term
             </p>
           </div>
         </div>
@@ -93,55 +123,43 @@ export const Dashboard = () => {
           <h2 className="text-xl font-bold text-slate-800 font-['Outfit'] flex items-center">
             <Clock className="mr-2 text-indigo-500" size={24} /> Recent Activities
           </h2>
-          <button className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+          <Link to="/audit-logs" className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
             View All Logs &rarr;
-          </button>
+          </Link>
         </div>
         
         <div className="space-y-6">
-          {/* Activity 1 */}
-          <div className="flex items-start group">
-            <div className="flex flex-col items-center mr-4">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center z-10 group-hover:scale-110 transition-transform">
-                <UserPlus size={18} className="text-emerald-600" />
+          {recentLogs.length === 0 ? (
+            <p className="text-slate-500 text-sm">No recent activity found.</p>
+          ) : (
+            recentLogs.map((log: any, index: number) => (
+              <div key={log.auditLogId} className="flex items-start group">
+                <div className="flex flex-col items-center mr-4">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 group-hover:scale-110 transition-transform ${
+                    log.action.includes('CREATE') ? 'bg-emerald-100 text-emerald-600' :
+                    log.action.includes('UPDATE') ? 'bg-amber-100 text-amber-600' :
+                    log.action.includes('DELETE') ? 'bg-red-100 text-red-600' :
+                    'bg-blue-100 text-blue-600'
+                  }`}>
+                    {log.action.includes('LOGIN') ? <ActivitySquare size={18} /> :
+                     log.action.includes('STUDENT') ? <UserPlus size={18} /> :
+                     <FileEdit size={18} />}
+                  </div>
+                  {index < recentLogs.length - 1 && <div className="w-0.5 h-full bg-slate-200 mt-2"></div>}
+                </div>
+                <div className="pb-4">
+                  <p className="text-slate-800 font-medium">{log.action}</p>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {log.adminName} ({log.adminEmail}) on <span className="font-semibold">{log.entityType}</span> {log.entityId && `#${log.entityId}`}
+                  </p>
+                  {log.newValue && <p className="text-xs text-slate-500 mt-1">{log.newValue}</p>}
+                  <p className="text-xs text-slate-400 mt-2 font-medium">
+                    {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
+                  </p>
+                </div>
               </div>
-              <div className="w-0.5 h-full bg-slate-200 mt-2"></div>
-            </div>
-            <div className="pb-4">
-              <p className="text-slate-800 font-medium">New Student Registered</p>
-              <p className="text-sm text-slate-500 mt-1">Admin created student <span className="font-mono text-indigo-600 bg-indigo-50 px-1 rounded">SE20260015</span> in Software Engineering.</p>
-              <p className="text-xs text-slate-400 mt-2 font-medium">10 minutes ago</p>
-            </div>
-          </div>
-
-          {/* Activity 2 */}
-          <div className="flex items-start group">
-            <div className="flex flex-col items-center mr-4">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center z-10 group-hover:scale-110 transition-transform">
-                <FileEdit size={18} className="text-amber-600" />
-              </div>
-              <div className="w-0.5 h-full bg-slate-200 mt-2"></div>
-            </div>
-            <div className="pb-4">
-              <p className="text-slate-800 font-medium">Profile Updated</p>
-              <p className="text-sm text-slate-500 mt-1">Admin updated contact information for <span className="font-mono text-indigo-600 bg-indigo-50 px-1 rounded">SE20260012</span>.</p>
-              <p className="text-xs text-slate-400 mt-2 font-medium">45 minutes ago</p>
-            </div>
-          </div>
-
-          {/* Activity 3 */}
-          <div className="flex items-start group">
-            <div className="flex flex-col items-center mr-4">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center z-10 group-hover:scale-110 transition-transform">
-                <BookOpen size={18} className="text-blue-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-800 font-medium">Course Enrollment</p>
-              <p className="text-sm text-slate-500 mt-1">Admin enrolled student <span className="font-mono text-indigo-600 bg-indigo-50 px-1 rounded">SE20260015</span> into SENG101.</p>
-              <p className="text-xs text-slate-400 mt-2 font-medium">2 hours ago</p>
-            </div>
-          </div>
+            ))
+          )}
         </div>
       </div>
     </div>

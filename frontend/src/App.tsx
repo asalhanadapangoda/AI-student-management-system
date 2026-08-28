@@ -6,14 +6,15 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { StudentRegistration } from './pages/StudentRegistration';
 import { StudentSearch } from './pages/StudentSearch';
+import { StudentList } from './pages/StudentList';
+import { StudentEnrollment } from './pages/StudentEnrollment';
+import { CourseList } from './pages/CourseList';
+import { AcademicYears } from './pages/AcademicYears';
+import { Semesters } from './pages/Semesters';
+import { DegreePrograms } from './pages/DegreePrograms';
+import { CourseOfferings } from './pages/CourseOfferings';
+import { GlobalEnrollments } from './pages/GlobalEnrollments';
 import { AuditLogs } from './pages/AuditLogs';
-
-// Placeholders
-const Courses = () => <div>Courses Page</div>;
-const CourseOfferings = () => <div>Course Offerings Page</div>;
-const Enrollments = () => <div>Enrollments Page</div>;
-const AcademicYears = () => <div>Academic Years Page</div>;
-const Semesters = () => <div>Semesters Page</div>;
 
 function App() {
   return (
@@ -25,13 +26,16 @@ function App() {
           <Route element={<AuthGuard />}>
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/students" element={<StudentSearch />} />
+              <Route path="/students" element={<StudentList />} />
+              <Route path="/students/search" element={<StudentSearch />} />
               <Route path="/students/new" element={<StudentRegistration />} />
-              <Route path="/courses" element={<Courses />} />
+              <Route path="/courses" element={<CourseList />} />
               <Route path="/offerings" element={<CourseOfferings />} />
-              <Route path="/enrollments" element={<Enrollments />} />
+              <Route path="/enrollments" element={<GlobalEnrollments />} />
+              <Route path="/students/:id/enroll" element={<StudentEnrollment />} />
               <Route path="/academic-years" element={<AcademicYears />} />
               <Route path="/semesters" element={<Semesters />} />
+              <Route path="/degrees" element={<DegreePrograms />} />
               <Route path="/audit-logs" element={<AuditLogs />} />
             </Route>
           </Route>

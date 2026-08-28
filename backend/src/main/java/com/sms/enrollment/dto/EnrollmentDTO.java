@@ -25,4 +25,9 @@ public class EnrollmentDTO {
     private LocalDateTime enrolledAt;
     private LocalDateTime completedAt;
     private String grade;
+    
+    private String courseCode;
+    private String courseName;
+    private String semesterName;
+    private String academicYear;
 }

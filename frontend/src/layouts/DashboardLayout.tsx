@@ -23,6 +23,7 @@ const Sidebar = () => {
     { name: 'Courses', path: '/courses', icon: BookOpen },
     { name: 'Course Offerings', path: '/offerings', icon: GraduationCap },
     { name: 'Enrollments', path: '/enrollments', icon: ActivitySquare },
+    { name: 'Degree Programs', path: '/degrees', icon: GraduationCap },
     { name: 'Academic Years', path: '/academic-years', icon: Calendar },
     { name: 'Semesters', path: '/semesters', icon: Clock },
     { name: 'Audit Logs', path: '/audit-logs', icon: Settings },
@@ -55,17 +56,19 @@ const Sidebar = () => {
                   }`
                 }
               >
-                <span className="inline-flex justify-center items-center ml-4">
-                  <item.icon size={20} className="group-hover:scale-110 transition-transform duration-300" />
-                </span>
-                <span className="ml-3 text-sm font-medium tracking-wide">{item.name}</span>
-                
-                {/* Active Indicator line */}
-                <NavLink to={item.path} end={item.path === '/'}>
-                  {({ isActive }) => isActive && (
-                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1.5 h-8 bg-white rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
-                  )}
-                </NavLink>
+                {({ isActive }) => (
+                  <>
+                    <span className="inline-flex justify-center items-center ml-4">
+                      <item.icon size={20} className="group-hover:scale-110 transition-transform duration-300" />
+                    </span>
+                    <span className="ml-3 text-sm font-medium tracking-wide">{item.name}</span>
+                    
+                    {/* Active Indicator line */}
+                    {isActive && (
+                      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1.5 h-8 bg-white rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+                    )}
+                  </>
+                )}
               </NavLink>
             </li>
           ))}

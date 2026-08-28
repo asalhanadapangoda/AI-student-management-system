@@ -19,6 +19,7 @@ public class StudentController {
 
     private final StudentService studentService;
     private final EnrollmentService enrollmentService;
+    private final com.sms.audit.service.AuditLogService auditLogService;
 
     @GetMapping("/{id}/enrollments")
     public ResponseEntity<List<EnrollmentDTO>> getStudentEnrollments(@PathVariable Long id) {
@@ -28,6 +29,7 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<StudentDTO> createStudent(@Valid @RequestBody StudentDTO dto) {
         StudentDTO created = studentService.createStudent(dto);
+        auditLogService.logAction("CREATE_STUDENT", "Student", created.getStudentId(), null, created.getStudentNumber());
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
@@ -48,12 +50,15 @@ public class StudentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @Valid @RequestBody StudentDTO dto) {
-        return ResponseEntity.ok(studentService.updateStudent(id, dto));
+        StudentDTO updated = studentService.updateStudent(id, dto);
+        auditLogService.logAction("UPDATE_STUDENT", "Student", id, null, updated.getStudentNumber());
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
+        auditLogService.logAction("DELETE_STUDENT", "Student", id, null, null);
         return ResponseEntity.noContent().build();
     }
 }

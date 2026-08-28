@@ -8,6 +8,8 @@ export const StudentSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [enrollmentsHistory, setEnrollmentsHistory] = useState<any>({});
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
@@ -16,12 +18,39 @@ export const StudentSearch = () => {
       setIsLoading(true);
       setError('');
       setStudent(null);
+      setEnrollmentsHistory({});
       
       const studentRes = await api.get(`/students/number/${searchTerm}`);
       setStudent(studentRes.data);
       
-      // We will handle enrollments mapping when the real API returns them
-      await api.get(`/students/${studentRes.data.studentId}/enrollments`);
+      const enrollRes = await api.get(`/students/${studentRes.data.studentId}/enrollments`);
+      
+      // Group by academicYear, then by semesterName
+      const grouped: any = {};
+      enrollRes.data.forEach((enrollment: any) => {
+        const year = enrollment.academicYear || 'Unknown Year';
+        const sem = enrollment.semesterName || 'Unknown Semester';
+        const courseStr = `${enrollment.courseCode} - ${enrollment.courseName}`;
+        
+        if (!grouped[year]) {
+          grouped[year] = {};
+        }
+        if (!grouped[year][sem]) {
+          grouped[year][sem] = [];
+        }
+        grouped[year][sem].push(courseStr);
+      });
+      
+      // Convert grouped object to array format for rendering
+      const formattedHistory: any = {};
+      Object.keys(grouped).forEach(year => {
+        formattedHistory[year] = Object.keys(grouped[year]).map(sem => ({
+          semester: sem,
+          courses: grouped[year][sem]
+        }));
+      });
+      
+      setEnrollmentsHistory(formattedHistory);
 
     } catch (err: any) {
       if (err.response?.status === 404) {
@@ -32,16 +61,6 @@ export const StudentSearch = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const groupedHistory = {
-    '2026/2027': [
-      { semester: 'Semester 1', courses: ['SENG101 - Introduction to SE', 'SENG102 - Programming I', 'SENG103 - Math'] },
-      { semester: 'Semester 2', courses: ['SENG201 - Data Structures', 'SENG202 - Database Systems'] }
-    ],
-    '2027/2028': [
-      { semester: 'Semester 1', courses: [] }
-    ]
   };
 
   return (
@@ -170,8 +189,14 @@ export const StudentSearch = () => {
               </div>
               
               <div className="space-y-8 pl-2">
-                {Object.entries(groupedHistory).map(([year, semesters]) => (
-                  <div key={year} className="relative">
+                {Object.entries(enrollmentsHistory).length === 0 ? (
+                  <div className="bg-slate-50 border border-slate-100 border-dashed rounded-xl p-8 text-center">
+                    <BookOpen className="mx-auto h-8 w-8 text-slate-300 mb-3" />
+                    <p className="text-sm font-medium text-slate-500">No enrollment history found for this student.</p>
+                  </div>
+                ) : (
+                  Object.entries(enrollmentsHistory).map(([year, semesters]: any) => (
+                    <div key={year} className="relative">
                     <div className="flex items-center mb-4">
                       <div className="bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md z-10 flex items-center">
                         <Calendar size={14} className="mr-1.5 text-indigo-400" /> {year}
@@ -179,7 +204,7 @@ export const StudentSearch = () => {
                     </div>
                     
                     <div className="ml-4 pl-8 border-l-2 border-indigo-100 space-y-6 pb-2">
-                      {semesters.map((sem, idx) => (
+                      {semesters.map((sem: any, idx: number) => (
                         <div key={idx} className="relative group">
                           {/* Timeline dot */}
                           <div className="absolute -left-[37px] top-1 h-4 w-4 rounded-full bg-white border-4 border-indigo-500 group-hover:scale-125 transition-transform duration-300 shadow-sm"></div>
@@ -191,7 +216,7 @@ export const StudentSearch = () => {
                           
                           {sem.courses.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                              {sem.courses.map((course, cIdx) => (
+                              {sem.courses.map((course: string, cIdx: number) => (
                                 <div key={cIdx} className="bg-white border border-slate-100 p-3 rounded-xl shadow-sm hover:border-indigo-200 transition-colors flex items-start">
                                   <div className="w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
                                     <BookOpen size={12} className="text-indigo-600" />
@@ -211,7 +236,8 @@ export const StudentSearch = () => {
                       ))}
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>

@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final com.sms.audit.service.AuditLogService auditLogService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody AuthRequestDTO request) {
-        return ResponseEntity.ok(authService.login(request));
+        AuthResponseDTO response = authService.login(request);
+        auditLogService.logActionWithEmail(request.getEmail(), "LOGIN", "System", null, null, "Successful login");
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")

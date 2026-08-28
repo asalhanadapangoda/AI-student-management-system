@@ -15,4 +15,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// ----------------- Dashboard & Audit APIs -----------------
+export const getDashboardStats = async () => {
+    const response = await api.get('/dashboard/stats');
+    return response.data;
+};
+
+export const getAuditLogs = async () => {
+    const response = await api.get('/audit-logs');
+    return response.data;
+};
+
 export default api;

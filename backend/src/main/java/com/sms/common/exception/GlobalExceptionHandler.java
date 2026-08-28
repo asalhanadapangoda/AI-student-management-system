@@ -54,9 +54,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+        String message = ex.getMessage();
+        if (message == null || message.isEmpty() || message.equals("Full authentication is required to access this resource")) {
+            message = "Unauthorized: Missing or invalid authentication token";
+        } else if (message.equals("Bad credentials")) {
+            message = "Invalid email or password";
+        }
+        
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .success(false)
-                .message("Unauthorized: Missing or invalid authentication token")
+                .message(message)
                 .timestamp(LocalDateTime.now())
                 .path(request.getRequestURI())
                 .build();
@@ -77,10 +84,11 @@ public class GlobalExceptionHandler {
     // Generic 500 Internal Server Error Handler
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleAllExceptions(Exception ex, HttpServletRequest request) {
-        // In a real application, you might want to log 'ex' for debugging
+        // Log the exception for debugging
+        ex.printStackTrace();
         ErrorResponseDTO errorResponse = ErrorResponseDTO.builder()
                 .success(false)
-                .message("An unexpected internal server error occurred")
+                .message("An unexpected internal server error occurred: " + ex.getMessage())
                 .timestamp(LocalDateTime.now())
                 .path(request.getRequestURI())
                 .build();
